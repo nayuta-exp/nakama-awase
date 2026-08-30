@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#7ec8ea">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>かいじゅうたいじ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="hub-back" href="/">もどる</a>
+  <header class="hud">
+    <h1 class="title">かいじゅうたいじ</h1>
+    <p class="score" aria-live="polite">
+      <span class="star" aria-hidden="true">★</span>
+      <span id="count">0</span>
+    </p>
+  </header>
+  <div class="field" id="field"></div>
+  <div class="hero" id="hero" aria-hidden="true">
+    <img id="hero-img" alt="">
+    <p class="hero-name" id="hero-name"></p>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>

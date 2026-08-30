@@ -1,0 +1,299 @@
+/* かいじゅうたいじ — no-fail tap game for a 5-year-old */
+
+:root {
+  --sky: #7ec8ea;
+  --cream: #fff6e4;
+  --cream-warm: #f8ead0;
+  --yellow: #ffd54a;
+  --ink: #3a2a18;
+  --ink-soft: #5c4630;
+  --title: #2f6fa3;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+  font-family: "Hiragino Maru Gothic ProN", "Yu Gothic", "YuGothic",
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Meiryo", "Noto Sans JP",
+    sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: none;
+  background-color: var(--sky);
+  background-image:
+    radial-gradient(ellipse 50% 40% at 12% 10%, #fff8e0 0%, transparent 58%),
+    radial-gradient(ellipse 40% 30% at 88% 8%, rgba(255, 213, 74, 0.5) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 28% at 50% 108%, #7bc45a 0%, #5aa344 42%, transparent 70%),
+    linear-gradient(180deg, #9fd6f2 0%, #7ec8ea 46%, #c8eaf7 78%, #e8f7c4 100%);
+}
+
+.hub-back {
+  position: fixed;
+  top: max(0.55rem, env(safe-area-inset-top));
+  left: max(0.55rem, env(safe-area-inset-left));
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  min-width: 56px;
+  padding: 0.5em 1.05em;
+  border: 2px solid rgba(47, 111, 163, 0.28);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffdf8, var(--cream-warm));
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  touch-action: manipulation;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 6px 16px rgba(80, 110, 140, 0.22);
+}
+
+.hub-back:active {
+  transform: translateY(1px);
+}
+
+.hud {
+  position: fixed;
+  top: max(0.45rem, env(safe-area-inset-top));
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  padding: 0 max(5.6rem, calc(env(safe-area-inset-right) + 5.2rem)) 0 max(5.6rem, calc(env(safe-area-inset-left) + 5.2rem));
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.15rem, 3.6vw, 1.7rem);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
+  color: var(--title);
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.8);
+  line-height: 1.2;
+}
+
+.score {
+  position: fixed;
+  top: max(0.55rem, env(safe-area-inset-top));
+  right: max(0.55rem, env(safe-area-inset-right));
+  z-index: 40;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  min-height: 56px;
+  padding: 0 0.95rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffdf8, #ffe78a);
+  border: 2px solid rgba(240, 180, 41, 0.7);
+  font-size: clamp(1.45rem, 4.4vw, 1.9rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 6px 16px rgba(80, 110, 140, 0.22);
+  pointer-events: none;
+}
+
+.star {
+  color: #f0b429;
+  font-size: 1.15em;
+  line-height: 1;
+}
+
+.field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.kaiju {
+  appearance: none;
+  position: absolute;
+  padding: 0;
+  margin: 0;
+  border: 5px solid rgba(255, 255, 255, 0.92);
+  border-radius: 28px;
+  background-color: #fff8e0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    0 10px 0 rgba(40, 70, 40, 0.12),
+    0 18px 28px rgba(40, 80, 110, 0.28);
+  animation: kaiju-in 420ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  will-change: transform, left, top;
+}
+
+.kaiju.is-bob {
+  animation:
+    kaiju-in 420ms cubic-bezier(0.2, 1.4, 0.4, 1) both,
+    kaiju-bob 1.8s ease-in-out 420ms infinite;
+}
+
+.kaiju.is-popping {
+  animation: kaiju-pop 480ms ease-in forwards;
+  pointer-events: none;
+  z-index: 12;
+}
+
+.spark {
+  position: absolute;
+  z-index: 16;
+  pointer-events: none;
+  font-size: 1.8rem;
+  color: #ffd54a;
+  text-shadow: 0 1px 0 #fff;
+  animation: spark-up 700ms ease-out forwards;
+}
+
+.hero {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.hero.is-flash {
+  animation: hero-flash 900ms ease-out forwards;
+}
+
+.hero img {
+  width: min(42vw, 280px);
+  height: min(42vw, 280px);
+  object-fit: cover;
+  border-radius: 28px;
+  border: 5px solid #fff;
+  box-shadow:
+    0 0 0 6px rgba(255, 213, 74, 0.55),
+    0 18px 40px rgba(40, 80, 110, 0.35);
+}
+
+.hero-name {
+  margin: 0.55rem 0 0;
+  padding: 0.28rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.92);
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--title);
+}
+
+@keyframes kaiju-in {
+  from {
+    transform: scale(0.35) translateY(40px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes kaiju-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(1.8deg);
+  }
+}
+
+@keyframes kaiju-pop {
+  0% {
+    transform: scale(1) rotate(0) translateY(0);
+    opacity: 1;
+  }
+  28% {
+    transform: scale(1.22) rotate(-8deg) translateY(-8px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.15) rotate(22deg) translateY(-90px);
+    opacity: 0;
+  }
+}
+
+@keyframes spark-up {
+  0% {
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, -70px))) scale(1.25);
+    opacity: 0;
+  }
+}
+
+@keyframes hero-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  22% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .title {
+    font-size: 1.05rem;
+  }
+
+  .hero img {
+    width: min(28vh, 180px);
+    height: min(28vh, 180px);
+  }
+
+  .hero-name {
+    display: none;
+  }
+}
