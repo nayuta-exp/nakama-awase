@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#12141c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>スーパーマインスイーパー</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>スーパーマインスイーパー</h1>
+      <p class="tagline">現代のインテリジェンスを込めたマインスイーパー</p>
+    </header>
+
+    <div class="panel">
+      <div class="diffs" role="group" aria-label="難易度">
+        <button type="button" data-diff="beginner" aria-pressed="true" class="is-active">初級</button>
+        <button type="button" data-diff="intermediate" aria-pressed="false">中級</button>
+        <button type="button" data-diff="expert" aria-pressed="false">上級</button>
+        <button type="button" data-diff="custom" aria-pressed="false">カスタム</button>
+      </div>
+      <form id="custom-form" class="custom-form" hidden>
+        <label class="field">幅（列）
+          <input id="custom-cols" name="cols" type="number" inputmode="numeric" min="5" max="30" value="16" aria-label="カスタムの幅">
+        </label>
+        <label class="field">高さ（行）
+          <input id="custom-rows" name="rows" type="number" inputmode="numeric" min="5" max="24" value="16" aria-label="カスタムの高さ">
+        </label>
+        <label class="field">機雷
+          <input id="custom-mines" name="mines" type="number" inputmode="numeric" min="1" max="711" value="40" aria-label="カスタムの機雷数">
+        </label>
+        <button type="submit" class="btn btn-primary">適用して開始</button>
+      </form>
+    </div>
+
+    <div class="hud" aria-live="polite">
+      <div class="hud-left">
+        <div class="led" id="mines-led">
+          <span class="led-label">残り機雷</span>
+          <span id="mine-count">010</span>
+        </div>
+      </div>
+      <button type="button" id="face" aria-label="新しいゲーム">🙂</button>
+      <div class="hud-right">
+        <div class="led" id="timer-led">
+          <span class="led-label">時間</span>
+          <span id="timer">000</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="intel">
+      <button type="button" id="hint-btn" class="btn btn-primary" aria-label="ヒント">ヒント</button>
+      <button type="button" id="step-btn" class="btn btn-step" aria-label="一手進める">一手進める</button>
+      <label class="toggle">
+        <input type="checkbox" id="autoflag" checked>
+        自動フラグ
+      </label>
+      <label class="toggle">
+        <input type="checkbox" id="probs">
+        確率表示
+      </label>
+    </div>
+
+    <div class="board-wrap">
+      <div id="board" role="grid" aria-label="盤面"></div>
+    </div>
+
+    <div id="message" class="message" role="status" aria-live="polite"></div>
+    <p class="help">左クリック／タップで開く。右クリック／長押しで旗。数字をタップすると、旗の数が一致していれば周囲をまとめて開きます。</p>
+  </div>
+
+  <script src="solver.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
