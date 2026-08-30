@@ -10,25 +10,42 @@
   <link rel="stylesheet" href="hub.css">
 </head>
 <body>
-  <main class="hub">
-    <nav class="hub-cards" aria-label="ゲーム">
-      <a class="poster" href="nurie/">
-        <img src="hub/nurie.jpg" alt="">
-        <span class="poster-name">ぬりえ</span>
-      </a>
-      <a class="poster" href="tataki/">
-        <img src="hub/tataki.jpg" alt="">
-        <span class="poster-name">たいじ</span>
-      </a>
-      <a class="poster" href="awase/">
-        <img src="hub/awase.jpg" alt="">
-        <span class="poster-name">あわせ</span>
-      </a>
-      <a class="poster" href="minesweeper/">
-        <img src="hub/minesweeper.jpg" alt="">
-        <span class="poster-name">かいじゅうさがし</span>
-      </a>
-    </nav>
+  <main class="hub" id="hub" aria-label="ゲーム">
+    <a class="slide" href="nurie/">
+      <img src="hub/nurie.jpg" alt="">
+      <span class="slide-name">ぬりえ</span>
+    </a>
+    <a class="slide" href="tataki/">
+      <img src="hub/tataki.jpg" alt="">
+      <span class="slide-name">たいじ</span>
+    </a>
+    <a class="slide" href="awase/">
+      <img src="hub/awase.jpg" alt="">
+      <span class="slide-name">あわせ</span>
+    </a>
+    <a class="slide" href="minesweeper/">
+      <img src="hub/minesweeper.jpg" alt="">
+      <span class="slide-name">かいじゅうさがし</span>
+    </a>
   </main>
+  <script>
+    (function () {
+      var hub = document.getElementById("hub");
+      var first = hub.querySelector(".slide");
+      if (!first) return;
+      var clone = first.cloneNode(true);
+      clone.setAttribute("data-clone", "1");
+      hub.appendChild(clone);
+      function onSnap() {
+        var last = hub.children[hub.children.length - 1];
+        if (!last || last.getAttribute("data-clone") !== "1") return;
+        var top = last.offsetTop;
+        if (Math.abs(hub.scrollTop - top) < 8) {
+          hub.scrollTop = 0;
+        }
+      }
+      hub.addEventListener("scrollend", onSnap);
+    })();
+  </script>
 </body>
 </html>

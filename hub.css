@@ -1,82 +1,73 @@
 *,
 *::before,
-*::after {
-  box-sizing: border-box;
-}
+*::after { box-sizing: border-box; }
 
-html,
-body {
+html, body {
   margin: 0;
-  min-height: 100%;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: #12141a;
 }
 
 body {
-  min-height: 100dvh;
   font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic",
     "YuGothic", "Meiryo", "Noto Sans JP", sans-serif;
   color: #fff;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
-  background: #12141a;
 }
 
 .hub {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100dvh;
-  padding: 24px;
-  padding-top: max(24px, env(safe-area-inset-top));
-  padding-right: max(24px, env(safe-area-inset-right));
-  padding-bottom: max(24px, env(safe-area-inset-bottom));
-  padding-left: max(24px, env(safe-area-inset-left));
+  height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
-.hub-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  width: 100%;
-  max-width: 1100px;
-}
-
-.poster {
+.slide {
   position: relative;
   display: block;
-  height: max(42vh, 280px);
+  width: 100%;
+  height: 100dvh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   overflow: hidden;
-  border-radius: 16px;
   text-decoration: none;
   color: #fff;
-  touch-action: manipulation;
 }
 
-.poster img {
+.slide img {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: -8%;
+  width: 116%;
+  height: 116%;
   object-fit: cover;
   object-position: center;
   pointer-events: none;
+  animation: ken 18s ease-in-out infinite alternate;
 }
 
-.poster-name {
+.slide-name {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 16px;
+  bottom: max(28px, env(safe-area-inset-bottom));
   z-index: 1;
-  padding: 0 12px;
-  font-size: 36px;
+  padding: 0 20px 8px;
+  font-size: clamp(40px, 8vw, 72px);
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.15;
   color: #fff;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 2px 18px #000, 0 0 40px rgba(0,0,0,0.8);
 }
 
-.poster:active {
-  transform: scale(0.99);
+@keyframes ken {
+  from { transform: scale(1) translate3d(0, 0, 0); }
+  to { transform: scale(1.08) translate3d(-2%, 1%, 0); }
 }
