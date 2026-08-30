@@ -737,3 +737,32 @@ body.is-dim .dim-veil {
     }
   }
 }
+
+.hub-back {
+  position: fixed;
+  top: max(0.55rem, env(safe-area-inset-top));
+  left: max(0.55rem, env(safe-area-inset-left));
+  z-index: 22;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  min-width: 56px;
+  padding: 0.5em 1em;
+  border: 2px solid rgba(47, 111, 163, 0.28);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffdf8, var(--cream-warm));
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 6px 16px rgba(80, 110, 140, 0.22);
+}
+
+.page {
+  padding-left: max(4.6rem, calc(env(safe-area-inset-left) + 4.2rem));
+}

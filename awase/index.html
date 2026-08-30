@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#7ec8ea">
+  <title>ヒーローのなかまあわせ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="hub-back" href="/">もどる</a>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="dim-veil" id="dim-veil" aria-hidden="true"></div>
+
+  <button type="button" class="mute" id="mute" aria-pressed="false">
+    <span class="mute-mark" id="mute-mark" aria-hidden="true">🔊</span>
+    <span class="mute-text" id="mute-text">おと</span>
+  </button>
+
+  <main class="page">
+    <h1 class="title">ヒーローのなかまあわせ</h1>
+    <div class="levels" role="group" aria-label="むずかしさ">
+      <button type="button" class="level is-on" data-level="easy" aria-pressed="true">初級</button>
+      <button type="button" class="level" data-level="mid" aria-pressed="false">中級</button>
+      <button type="button" class="level" data-level="hard" aria-pressed="false">上級</button>
+    </div>
+    <p class="pairs" aria-live="polite">
+      <span id="matched-count">0</span> / <span id="pair-total">6</span>
+    </p>
+    <div
+      class="board"
+      id="board"
+      data-level="easy"
+      role="group"
+      aria-label="カード"
+    ></div>
+    <p class="credit">音: Alex McCulloch / Pro Sensory · OpenGameArt · CC0</p>
+  </main>
+
+  <div
+    class="celebration"
+    id="celebration"
+    aria-hidden="true"
+  >
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+    <div class="celebrate-panel">
+      <p class="overlay-title">ヒーローのなかまあわせ</p>
+      <p class="message" id="win-message">よくできたね</p>
+      <button type="button" class="again" id="again">もういちど</button>
+    </div>
+  </div>
+
+  <p class="audio-toast" id="audio-toast" role="status" aria-live="polite" aria-hidden="true">音が出せない</p>
+
+  <script src="game.js"></script>
+</body>
+</html>

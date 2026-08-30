@@ -1,0 +1,138 @@
+/* ゲーム入り口 — bright kids hub */
+
+:root {
+  --sky: #7ec8ea;
+  --cream: #fff6e4;
+  --yellow: #ffd54a;
+  --ink: #3a2a18;
+  --title: #2f6fa3;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  font-family: "Hiragino Maru Gothic ProN", "Yu Gothic", "YuGothic",
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Meiryo", "Noto Sans JP",
+    sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  background-image:
+    radial-gradient(ellipse 90% 70% at 8% -8%, #fff8e0 0%, transparent 55%),
+    radial-gradient(ellipse 80% 60% at 108% 8%, rgba(255, 213, 74, 0.45) 0%, transparent 52%),
+    radial-gradient(ellipse 70% 50% at 92% 108%, #fde7a8 0%, transparent 58%),
+    linear-gradient(168deg, #9fd6f2 0%, #7ec8ea 42%, #c8eaf7 78%, #fff1c4 100%);
+}
+
+.hub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding:
+    max(1.4rem, env(safe-area-inset-top))
+    max(1rem, env(safe-area-inset-right))
+    max(1.6rem, env(safe-area-inset-bottom))
+    max(1rem, env(safe-area-inset-left));
+}
+
+.hub-title {
+  margin: 0;
+  font-size: clamp(2.4rem, 10vw, 3.6rem);
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-indent: 0.16em;
+  color: var(--title);
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.75);
+}
+
+.hub-lead {
+  margin: 0.45rem 0 1.4rem;
+  font-size: clamp(1rem, 3.6vw, 1.25rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #5c4630;
+}
+
+.hub-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  width: min(34rem, 100%);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 9.5rem;
+  padding: 1.2rem 1rem 1.35rem;
+  border-radius: 28px;
+  text-decoration: none;
+  color: inherit;
+  touch-action: manipulation;
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.65) inset,
+    0 10px 24px rgba(80, 110, 140, 0.24);
+  transition: transform 120ms ease;
+}
+
+.card:active {
+  transform: translateY(2px);
+}
+
+.card-awase {
+  background: linear-gradient(180deg, #fffdf8, #ffe78a);
+  border: 3px solid rgba(240, 180, 41, 0.7);
+}
+
+.card-mine {
+  background: linear-gradient(180deg, #e8fbff, #9fe0d4);
+  border: 3px solid rgba(45, 180, 160, 0.55);
+}
+
+.card-emoji {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.card-name {
+  font-size: clamp(1.25rem, 4.6vw, 1.7rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.card-hint {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #5c4630;
+  opacity: 0.85;
+}
+
+@media (min-width: 640px) {
+  .hub-cards {
+    grid-template-columns: 1fr 1fr;
+    width: min(44rem, 100%);
+  }
+
+  .card {
+    min-height: 12rem;
+  }
+}
