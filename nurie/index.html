@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#7ec8ea">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>ぬりえ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="hub-back" href="/">もどる</a>
+  <main class="app">
+    <header class="top">
+      <h1 class="title">ぬりえ</h1>
+      <p class="lead">いろをえらんで、ぬりたいところをタッチしてね</p>
+    </header>
+
+    <nav class="pages" id="pages" aria-label="ぬりえのページ"></nav>
+
+    <div class="stage" id="stage">
+      <canvas id="paper" width="1536" height="1024" aria-label="ぬりえ"></canvas>
+    </div>
+
+    <div class="tools">
+      <div class="palette" id="palette" role="listbox" aria-label="いろ"></div>
+      <div class="actions">
+        <button type="button" class="tool-btn" id="undo" disabled>もどす</button>
+        <button type="button" class="tool-btn tool-reset" id="reset">けす</button>
+      </div>
+    </div>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>

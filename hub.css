@@ -105,6 +105,11 @@ body {
   border: 3px solid rgba(45, 180, 160, 0.55);
 }
 
+.card-nurie {
+  background: linear-gradient(180deg, #fff5fb, #ffb4d6);
+  border: 3px solid rgba(235, 90, 150, 0.55);
+}
+
 .card-emoji {
   font-size: 2.5rem;
   line-height: 1;
@@ -134,5 +139,12 @@ body {
 
   .card {
     min-height: 12rem;
+  }
+}
+
+@media (min-width: 960px) {
+  .hub-cards {
+    grid-template-columns: 1fr 1fr 1fr;
+    width: min(64rem, 100%);
   }
 }
