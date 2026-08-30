@@ -31,13 +31,9 @@
       if (restart) el.currentTime = 0;
       var playing = el.play();
       if (playing && typeof playing.catch === "function") {
-        playing.catch(function (err) {
-          console.error(err || "音が出せない");
-        });
+        playing.catch(function () {});
       }
-    } catch (err) {
-      console.error(err || "音が出せない");
-    }
+    } catch (err) {}
   }
 
   function unlockAudio() {

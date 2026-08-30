@@ -45,20 +45,36 @@
   nuru.volume = 1;
   var fanfare = new Audio("audio/clear-fanfare.ogg");
   fanfare.volume = 1;
-  var fillsUntilFanfare = 6;
+  var didFanfare = false;
 
   function playEl(el, restart) {
     try {
       if (restart) el.currentTime = 0;
       var playing = el.play();
       if (playing && typeof playing.catch === "function") {
-        playing.catch(function (err) {
-          console.error(err || "音が出せない");
-        });
+        playing.catch(function () {});
       }
-    } catch (err) {
-      console.error(err || "音が出せない");
+    } catch (err) {}
+  }
+
+  function isFullyPainted(d) {
+    if (!walls || !original) return false;
+    var src = original.data;
+    var n = walls.length;
+    var i;
+    var o;
+    var dr;
+    var dg;
+    var db;
+    for (i = 0; i < n; i++) {
+      if (walls[i]) continue;
+      o = i * 4;
+      dr = d[o] - src[o];
+      dg = d[o + 1] - src[o + 1];
+      db = d[o + 2] - src[o + 2];
+      if (dr * dr + dg * dg + db * db < 900) return false;
     }
+    return true;
   }
 
   function hexToRgb(hex) {
@@ -197,10 +213,9 @@
     filling = false;
     syncUndo();
     playEl(nuru, true);
-    fillsUntilFanfare -= 1;
-    if (fillsUntilFanfare <= 0) {
+    if (!didFanfare && isFullyPainted(d)) {
+      didFanfare = true;
       playEl(fanfare, true);
-      fillsUntilFanfare = 6;
     }
     return true;
   }
@@ -215,6 +230,7 @@
     syncUndo();
     walls = null;
     original = null;
+    didFanfare = false;
     Array.prototype.forEach.call(pagesEl.querySelectorAll(".page-btn"), function (btn) {
       var on = btn.getAttribute("data-id") === page.id;
       btn.classList.toggle("is-on", on);
@@ -246,6 +262,7 @@
     if (!original) return;
     ctx.putImageData(original, 0, 0);
     undoStack = [];
+    didFanfare = false;
     syncUndo();
   }
 
