@@ -79,6 +79,7 @@ body {
   inset: 0;
   align-items: center;
   justify-content: center;
+  padding-top: 88px;
 }
 
 .board {
@@ -86,7 +87,7 @@ body {
   grid-template-columns: repeat(3, var(--cell));
   grid-template-rows: repeat(3, var(--cell));
   gap: 8px;
-  --cell: calc(min(100vw, 100dvh) * 0.28);
+  --cell: calc(min(100vw, 100dvh) * 0.24);
 }
 
 .cell {
@@ -132,9 +133,16 @@ body {
 
 .stars {
   position: relative;
-  font-size: 2.4rem;
-  letter-spacing: 0.3em;
+  display: flex;
+  gap: 12px;
   animation: pop 700ms ease;
+}
+
+.stars img {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 12px;
 }
 
 .clear-actions {
