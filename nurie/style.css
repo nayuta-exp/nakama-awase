@@ -54,8 +54,8 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 56px;
-  min-width: 56px;
+  min-height: 72px;
+  min-width: 72px;
   padding: 0.5em 1em;
   border: 2px solid rgba(47, 111, 163, 0.28);
   border-radius: 999px;
@@ -86,7 +86,7 @@ body {
     max(0.7rem, env(safe-area-inset-bottom))
     max(0.7rem, env(safe-area-inset-left));
   padding-left: max(4.8rem, calc(env(safe-area-inset-left) + 4.4rem));
-  gap: 0.45rem;
+  gap: 0.3rem;
 }
 
 .top {
@@ -211,8 +211,8 @@ body {
 
 .swatch {
   appearance: none;
-  width: 3.15rem;
-  height: 3.15rem;
+  width: 72px;
+  height: 72px;
   min-width: 44px;
   min-height: 44px;
   border-radius: 999px;

@@ -54,8 +54,8 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 56px;
-  min-width: 56px;
+  min-height: 72px;
+  min-width: 72px;
   padding: 0.5em 1.05em;
   border: 2px solid rgba(47, 111, 163, 0.28);
   border-radius: 999px;

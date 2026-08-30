@@ -44,8 +44,7 @@
 
   function kaijuSize() {
     var shortSide = Math.min(window.innerWidth, window.innerHeight);
-    var base = Math.round(shortSide * 0.34);
-    return Math.max(176, Math.min(320, base + Math.round(rand(-12, 36))));
+    return Math.round(shortSide * 0.5);
   }
 
   function pad() {
