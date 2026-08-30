@@ -17,11 +17,34 @@
     { src: "assets/hero-moon.jpg", name: "つきヒーロー" }
   ];
 
-  var ROARS = [
-    "audio/monster_roar.wav",
-    "audio/small_dino.mp3",
-    "audio/t-rex_calls.mp3"
-  ];
+  var bgm = new Audio("audio/bgm-loop.ogg");
+  bgm.loop = true;
+  bgm.volume = 0.85;
+  var hajike = new Audio("audio/hajike.ogg");
+  hajike.volume = 1;
+  var fanfare = new Audio("audio/nakama-fanfare.ogg");
+  fanfare.volume = 1;
+  var audioReady = false;
+
+  function playEl(el, restart) {
+    try {
+      if (restart) el.currentTime = 0;
+      var playing = el.play();
+      if (playing && typeof playing.catch === "function") {
+        playing.catch(function (err) {
+          console.error(err || "音が出せない");
+        });
+      }
+    } catch (err) {
+      console.error(err || "音が出せない");
+    }
+  }
+
+  function unlockAudio() {
+    if (audioReady) return;
+    audioReady = true;
+    playEl(bgm, false);
+  }
 
   var MIN_ON = 1;
   var MAX_ON = 3;
@@ -98,15 +121,14 @@
     return box;
   }
 
-  function playRoar() {
-    try {
-      var audio = new Audio(pick(ROARS));
-      audio.volume = 0.85;
-      var playing = audio.play();
-      if (playing && typeof playing.catch === "function") {
-        playing.catch(function () {});
-      }
-    } catch (err) {}
+  function playHajike() {
+    unlockAudio();
+    playEl(hajike, true);
+  }
+
+  function playFanfare() {
+    unlockAudio();
+    playEl(fanfare, true);
   }
 
   function burstStars(x, y) {
@@ -147,6 +169,7 @@
     burstStars(x, y);
     tapsToHero -= 1;
     if (tapsToHero <= 0) {
+      playFanfare();
       flashHero();
       tapsToHero = 4 + Math.floor(Math.random() * 3);
     }
@@ -159,7 +182,7 @@
     if (!el || el.classList.contains("is-popping")) return;
     el.classList.add("is-popping");
     el.classList.remove("is-bob");
-    playRoar();
+    playHajike();
     var rect = el.getBoundingClientRect();
     bumpScore(rect.left + rect.width / 2, rect.top + rect.height / 2);
     window.setTimeout(function () {
@@ -216,6 +239,7 @@
   }
 
   lockScroll();
+  document.addEventListener("pointerdown", unlockAudio, { once: true });
   ensureKaiju();
   spawnTimer = window.setInterval(function () {
     if (liveKaiju().length < MAX_ON) spawnKaiju();

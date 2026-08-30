@@ -41,6 +41,25 @@
   var currentPage = PAGES[0];
   var filling = false;
   var pointerDown = false;
+  var nuru = new Audio("audio/nuru.ogg");
+  nuru.volume = 1;
+  var fanfare = new Audio("audio/clear-fanfare.ogg");
+  fanfare.volume = 1;
+  var fillsUntilFanfare = 6;
+
+  function playEl(el, restart) {
+    try {
+      if (restart) el.currentTime = 0;
+      var playing = el.play();
+      if (playing && typeof playing.catch === "function") {
+        playing.catch(function (err) {
+          console.error(err || "音が出せない");
+        });
+      }
+    } catch (err) {
+      console.error(err || "音が出せない");
+    }
+  }
 
   function hexToRgb(hex) {
     var n = parseInt(hex.slice(1), 16);
@@ -177,6 +196,12 @@
     ctx.putImageData(img, 0, 0);
     filling = false;
     syncUndo();
+    playEl(nuru, true);
+    fillsUntilFanfare -= 1;
+    if (fillsUntilFanfare <= 0) {
+      playEl(fanfare, true);
+      fillsUntilFanfare = 6;
+    }
     return true;
   }
 
