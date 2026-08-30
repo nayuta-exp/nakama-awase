@@ -213,8 +213,8 @@ body {
   appearance: none;
   width: 72px;
   height: 72px;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 72px;
+  min-height: 72px;
   border-radius: 999px;
   border: 3px solid rgba(58, 42, 24, 0.18);
   cursor: pointer;
@@ -254,9 +254,10 @@ body {
   flex-shrink: 0;
 }
 
+
 .tool-btn {
   appearance: none;
-  min-height: 48px;
+  min-height: 72px;
   min-width: 5.4rem;
   padding: 0.4em 0.85em;
   border-radius: 999px;
@@ -289,7 +290,7 @@ body {
 
 @media (min-width: 900px) {
   .page-btn {
-    min-height: 5.4rem;
+    min-height: 72px;
     font-size: 1rem;
   }
 
@@ -298,8 +299,8 @@ body {
   }
 
   .swatch {
-    width: 3.5rem;
-    height: 3.5rem;
+    width: 72px;
+    height: 72px;
   }
 }
 
@@ -309,8 +310,8 @@ body {
   }
 
   .page-btn {
-    min-height: 3.6rem;
-    min-width: 4.6rem;
+    min-height: 72px;
+    min-width: 72px;
     flex-direction: row;
     justify-content: center;
     gap: 0.4rem;
@@ -318,18 +319,18 @@ body {
   }
 
   .page-btn img {
-    width: 3.2rem;
-    height: 2.1rem;
+    width: 56px;
+    height: 48px;
     flex-shrink: 0;
   }
 
   .swatch {
-    width: 2.7rem;
-    height: 2.7rem;
+    width: 72px;
+    height: 72px;
   }
 
   .tool-btn {
-    min-height: 44px;
+    min-height: 72px;
     font-size: 0.95rem;
   }
 }
