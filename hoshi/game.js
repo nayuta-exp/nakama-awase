@@ -143,6 +143,8 @@ timer.connect(document);
 let heroTex = null;
 let gTex = null;
 let rTex = null;
+let huntTex = null;
+let chaseTex = null;
 let looping = false;
 const grounds = [];
 const stars = [];
@@ -160,6 +162,7 @@ let starsGot = 0;
 let audioOn = false;
 let time = 0;
 let lane = 1;
+let targetLane = 1;
 let friends = 0;
 let sayT = 0;
 
@@ -257,31 +260,27 @@ function maybeSpawnKaiju() {
     if (!k.live && starsGot >= k.at) {
       k.live = true;
       k.friend = false;
+      k.hits = 0;
+      k.age = 0;
       k.group.visible = true;
-      k.group.position.set(k.sideX, 0, 18);
+      if (k.kind === "chase") k.group.position.set(LANES[targetLane], 0, -7.5);
+      else if (k.kind === "hunt") k.group.position.set(0, 0, 20);
+      else k.group.position.set(k.sideX, 0, 18);
     }
   }
 }
 
-function punchNearby() {
-  let i;
-  let hit = false;
-  const hx = heroRoot ? heroRoot.position.x : 0;
-  for (i = 0; i < kaiju.length; i += 1) {
-    const k = kaiju[i];
-    if (!k.live || k.friend) continue;
-    const z = k.group.position.z;
-    const dx = Math.abs(k.group.position.x - hx);
-    if (z > -1 && z < 10 && dx < 4.2) {
-      k.friend = true;
-      friends += 1;
-      hit = true;
-      burst(k.group.position.x, 1.6, k.group.position.z, 18);
-      say("なかまになれ！");
-      if (audioOn) playEl(punchSnd, true);
-    }
+function landPunch(k) {
+  if (!k || !k.live || k.friend) return;
+  k.hits += 1;
+  burst(k.group.position.x, 1.6, k.group.position.z, 14);
+  if (audioOn) playEl(punchSnd, true);
+  const need = k.need || 1;
+  if (k.hits >= need) {
+    k.friend = true;
+    friends += 1;
+    burst(k.group.position.x, 1.8, k.group.position.z, 22);
   }
-  return hit;
 }
 
 function win() {
@@ -303,6 +302,7 @@ function resetRun() {
   starsGot = 0;
   friends = 0;
   lane = 1;
+  targetLane = 1;
   countEl.textContent = "0";
   clearEl.classList.remove("is-on");
   startEl.classList.remove("is-on");
@@ -367,18 +367,14 @@ function punchAt(cx, cy) {
     const k = kaiju[i];
     if (!k.live || k.friend) continue;
     const v = k.group.position.clone();
-    v.y += 1.4;
+    v.y += k.kind === "hunt" ? 2.2 : 1.4;
     v.project(camera);
     const sx = (v.x * 0.5 + 0.5) * rect.width + rect.left;
     const sy = (-v.y * 0.5 + 0.5) * rect.height + rect.top;
-    const r = Math.min(rect.width, rect.height) * 0.24;
+    const r = Math.min(rect.width, rect.height) * (k.kind === "hunt" ? 0.34 : 0.2);
     if (Math.hypot(cx - sx, cy - sy) < r) {
-      k.friend = true;
-      friends += 1;
+      landPunch(k);
       hit = true;
-      burst(k.group.position.x, 1.6, k.group.position.z, 18);
-      say("なかまになれ！");
-      if (audioOn) playEl(punchSnd, true);
     }
   }
   return hit;
@@ -400,7 +396,15 @@ function onPointer(ev) {
   }
   if (mode !== "play") return;
   if (punchAt(ev.clientX, ev.clientY)) return;
-  startJump();
+  const rect = canvas.getBoundingClientRect();
+  const x = ev.clientX - rect.left;
+  const y = ev.clientY - rect.top;
+  if (y < rect.height * 0.3) {
+    startJump();
+    return;
+  }
+  if (x < rect.width * 0.5) targetLane = Math.max(0, targetLane - 1);
+  else targetLane = Math.min(2, targetLane + 1);
 }
 
 function updateHero(dt) {
@@ -408,8 +412,8 @@ function updateHero(dt) {
     jumpT += dt;
     if (jumpT >= JUMP_DUR) jumpT = -1;
   }
-  lane += (1 - lane) * Math.min(1, 8 * dt);
-  const x = LANES[1];
+  lane += (targetLane - lane) * Math.min(1, 10 * dt);
+  const x = LANES[0] + (LANES[2] - LANES[0]) * (lane / 2);
   const y = Math.max(0, jumpY());
   if (heroRoot) {
     heroRoot.position.set(x, y, 0);
@@ -446,6 +450,11 @@ function updateStars(dt) {
       s.group.position.x += (hx - s.group.position.x) * Math.min(1, 10 * dt);
       s.group.position.y += (1.15 + hy * 0.35 - s.group.position.y) * Math.min(1, 10 * dt);
       s.group.position.z += (0 - s.group.position.z) * Math.min(1, 10 * dt);
+    } else if (STAR_HIGH[i]) {
+      const near = s.group.position.z < 18 && s.group.position.z > 1;
+      const hop = near ? 0.55 + Math.abs(Math.sin(time * 7 + s.phase)) * 1.35 : 0.2;
+      s.group.position.y = 3.05 + hop;
+      s.group.scale.setScalar(1.2 + hop * 0.28);
     } else {
       s.group.position.y = starY(i) + Math.sin(time * 2.2 + s.phase) * 0.16;
     }
@@ -466,12 +475,38 @@ function updateStars(dt) {
 function updateKaiju(dt) {
   if (mode !== "play") return;
   const sp = speedNow();
+  const hx = heroRoot ? heroRoot.position.x : 0;
   let i;
   for (i = 0; i < kaiju.length; i += 1) {
     const k = kaiju[i];
     if (!k.live) continue;
-    if (k.group.position.z > 5.5) k.group.position.z -= sp * dt;
-    else k.group.position.z = 5.5;
+    k.age += dt;
+    if (k.kind === "chase") {
+      const wantX = LANES[targetLane];
+      k.group.position.x += (wantX - k.group.position.x) * Math.min(1, 6 * dt);
+      if (!k.friend && k.age < 3.1) k.group.position.z = Math.min(-1.6, k.group.position.z + 2.1 * dt);
+      else k.group.position.z -= sp * 1.4 * dt;
+      k.group.scale.setScalar(k.friend ? 0.85 : 1.35 + Math.max(0, -k.group.position.z) * 0.08);
+      if (k.group.position.z < -14) {
+        k.live = false;
+        k.group.visible = false;
+      }
+    } else if (k.kind === "hunt") {
+      if (!k.friend && k.age < 5.5) {
+        if (k.group.position.z > 6.2) k.group.position.z -= sp * dt;
+        else k.group.position.z = 6.2;
+      } else {
+        k.group.position.z += sp * 1.6 * dt;
+        if (k.group.position.z > 40) {
+          k.live = false;
+          k.group.visible = false;
+        }
+      }
+      k.group.position.x = 0;
+    } else {
+      if (k.group.position.z > 5.5) k.group.position.z -= sp * dt;
+      else k.group.position.z = 5.5;
+    }
     k.group.position.y = k.friend ? 0.12 : 0;
     if (k.mesh) k.mesh.lookAt(camera.position.x, 1.4, camera.position.z);
   }
@@ -580,7 +615,7 @@ function mountWorld() {
   mountLights();
   buildGrounds(makeRoadTex());
   buildHero(heroTex);
-  buildKaiju(gTex, rTex);
+  buildKaiju(gTex, rTex, huntTex, chaseTex);
   buildStarPool();
   buildSparkPool();
   buildRubble();
@@ -644,18 +679,31 @@ function buildHero(tex) {
   scene.add(heroShadow);
 }
 
-function buildKaiju(gTex, rTex) {
-  function add(tex, sideX, at) {
+function buildKaiju(gTex, rTex, hTex, cTex) {
+  function add(tex, sideX, at, kind, w, h, need) {
     const group = new THREE.Group();
-    const mesh = billboard(tex, 2.4, 2.8);
+    const mesh = billboard(tex, w, h);
     group.add(mesh);
     group.visible = false;
     group.position.set(sideX, 0, 40);
     scene.add(group);
-    kaiju.push({ group: group, mesh: mesh, sideX: sideX, at: at, live: false, friend: false });
+    kaiju.push({
+      group: group,
+      mesh: mesh,
+      sideX: sideX,
+      at: at,
+      kind: kind,
+      need: need,
+      hits: 0,
+      age: 0,
+      live: false,
+      friend: false
+    });
   }
-  add(gTex, -4.2, 4);
-  add(rTex, 4.2, 7);
+  add(gTex, -4.2, 4, "side", 2.4, 2.8, 1);
+  add(rTex, 4.2, 7, "side", 2.4, 2.8, 1);
+  add(hTex || gTex, 0, 5, "hunt", 5.4, 4.4, 3);
+  add(cTex || rTex, 0, 8, "chase", 3.4, 3.4, 1);
 }
 
 function buildStarPool() {
@@ -754,6 +802,8 @@ async function boot() {
   heroTex = await loadTex(loader, "assets/hero.png");
   gTex = await loadTex(loader, "assets/kaiju-g.png");
   rTex = await loadTex(loader, "assets/kaiju-r.png");
+  huntTex = await loadTex(loader, "assets/hunt.png");
+  chaseTex = await loadTex(loader, "assets/chase-face.png");
   mountWorld();
   canvas.addEventListener("pointerup", onPointer, { passive: false });
   startEl.addEventListener("pointerup", onPointer, { passive: false });
