@@ -406,12 +406,12 @@ function onPointer(ev) {
   const rect = canvas.getBoundingClientRect();
   const x = ev.clientX - rect.left;
   const y = ev.clientY - rect.top;
-  if (y < rect.height * 0.3) {
+  if (y < rect.height * 0.5) {
     startJump();
     return;
   }
-  if (x < rect.width * 0.5) targetLane = Math.max(0, targetLane - 1);
-  else targetLane = Math.min(2, targetLane + 1);
+  if (x < rect.width * 0.5) targetLane = 2;
+  else targetLane = 0;
 }
 
 function updateHero(dt) {
