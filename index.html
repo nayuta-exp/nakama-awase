@@ -3,53 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#12141a">
+  <meta name="theme-color" content="#0b1020">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <title>ゲーム</title>
   <link rel="stylesheet" href="hub.css">
 </head>
 <body>
-  <main class="hub" id="hub" aria-label="ゲーム">
-    <a class="slide" href="hoshi/">
-      <img src="hub/hoshi.png" alt="">
-      <span class="slide-name">ほしとり</span>
-    </a>
-    <a class="slide" href="nurie/">
-      <img src="hub/nurie.png" alt="">
-      <span class="slide-name">ぬりえ</span>
-    </a>
-    <a class="slide" href="tataki/">
-      <img src="hub/tataki.png" alt="">
-      <span class="slide-name">たいじ</span>
-    </a>
-    <a class="slide" href="awase/">
-      <img src="hub/awase.png" alt="">
-      <span class="slide-name">あわせ</span>
-    </a>
-    <a class="slide" href="minesweeper/">
-      <img src="hub/minesweeper.png" alt="">
-      <span class="slide-name">かいじゅうさがし</span>
-    </a>
+  <main class="hub" aria-label="ゲーム">
+    <a class="card" href="hoshi/"><img src="hub/hoshi.png" alt="ほしとり"></a>
+    <a class="card" href="nurie/"><img src="hub/nurie.png" alt="ぬりえ"></a>
+    <a class="card" href="tataki/"><img src="hub/tataki.png" alt="たいじ"></a>
+    <a class="card" href="awase/"><img src="hub/awase.png" alt="あわせ"></a>
+    <a class="card" href="minesweeper/"><img src="hub/minesweeper.png" alt="かいじゅうさがし"></a>
   </main>
-  <script>
-    (function () {
-      var hub = document.getElementById("hub");
-      var first = hub.querySelector(".slide");
-      if (!first) return;
-      var clone = first.cloneNode(true);
-      clone.setAttribute("data-clone", "1");
-      hub.appendChild(clone);
-      function onSnap() {
-        var last = hub.children[hub.children.length - 1];
-        if (!last || last.getAttribute("data-clone") !== "1") return;
-        var top = last.offsetTop;
-        if (Math.abs(hub.scrollTop - top) < 8) {
-          hub.scrollTop = 0;
-        }
-      }
-      hub.addEventListener("scrollend", onSnap);
-    })();
-  </script>
+  <div class="dots" aria-hidden="true">
+    <i class="is-on"></i><i></i><i></i><i></i><i></i>
+  </div>
 </body>
 </html>
