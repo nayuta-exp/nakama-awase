@@ -12,14 +12,15 @@
   </script>
 </head>
 <body>
-  <a class="hub-back" href="/">もどる</a>
-  <p class="score" aria-live="polite"><span id="count">0</span>/10</p>
+  <header class="hud">
+    <a class="hub-back" href="/">もどる</a>
+    <p class="score" aria-live="polite"><span id="count">0</span>/10</p>
+  </header>
   <canvas id="view"></canvas>
   <p class="say" id="say" hidden></p>
   <button type="button" class="jump-btn" id="jump">ジャンプ</button>
   <section class="screen is-on" id="start">
-    <img class="start-hero" src="assets/hero.png" alt="">
-    <p class="speech">街の奥に星が10こ。走って、ジャンプして、ぜんぶとれ！かいじゅうがいたらパンチだ！</p>
+    <img class="start-hero" src="assets/hero.png" alt="ほしとり">
   </section>
   <section class="overlay" id="clear">
     <div class="glow"></div>

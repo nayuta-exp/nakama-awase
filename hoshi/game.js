@@ -165,7 +165,6 @@ let time = 0;
 let lane = 1;
 let targetLane = 1;
 let friends = 0;
-let shake = 0;
 let sayT = 0;
 
 function speedNow() {
@@ -303,7 +302,6 @@ function resetRun() {
   friends = 0;
   lane = 1;
   targetLane = 1;
-  shake = 0;
   countEl.textContent = "0";
   clearEl.classList.remove("is-on");
   startEl.classList.remove("is-on");
@@ -369,9 +367,8 @@ function onPointer(ev) {
   if (punchNearby()) return;
   const x = ev.clientX;
   const mid = window.innerWidth * 0.5;
-  if (x < mid - 24) targetLane = Math.max(0, targetLane - 1);
-  else if (x > mid + 24) targetLane = Math.min(2, targetLane + 1);
-  else startJump();
+  if (x < mid) targetLane = Math.max(0, targetLane - 1);
+  else targetLane = Math.min(2, targetLane + 1);
 }
 
 function updateHero(dt) {
@@ -394,12 +391,7 @@ function updateHero(dt) {
     heroShadow.scale.set(s, s, 1);
     heroShadow.material.opacity = 0.32 * s;
   }
-  if (shake > 0) {
-    shake -= dt;
-    camera.position.x = Math.sin(time * 48) * 0.12 * Math.max(0, shake);
-  } else {
-    camera.position.x = 0;
-  }
+  camera.position.x = 0;
 }
 
 function updateStars(dt) {
@@ -450,11 +442,6 @@ function updateKaiju(dt) {
     else k.group.position.z = 5.5;
     k.group.position.y = k.friend ? 0.12 : 0;
     if (k.mesh) k.mesh.lookAt(camera.position.x, 1.4, camera.position.z);
-    const hx = heroRoot ? heroRoot.position.x : 0;
-    if (!k.friend && Math.abs(k.group.position.x - hx) < 1.2 && k.group.position.z < 7 && jumpY() < 0.4) {
-      shake = 0.28;
-      if (audioOn) playEl(bumpSnd, true);
-    }
   }
 }
 
@@ -521,8 +508,8 @@ function lockScroll() {
 
 function billboard(tex, w, h) {
   const mat = tex
-    ? new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide, depthWrite: false })
-    : new THREE.MeshBasicMaterial({ color: 0xc43b2a, side: THREE.DoubleSide, transparent: true });
+    ? new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.12, side: THREE.DoubleSide, depthWrite: false })
+    : new THREE.MeshBasicMaterial({ color: 0xc43b2a, side: THREE.DoubleSide, transparent: true, alphaTest: 0.12 });
   const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
   mesh.position.y = h * 0.5;
   return mesh;
