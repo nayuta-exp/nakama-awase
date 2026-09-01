@@ -263,7 +263,7 @@ function maybeSpawnKaiju() {
       k.hits = 0;
       k.age = 0;
       k.group.visible = true;
-      if (k.kind === "chase") k.group.position.set(LANES[targetLane], 0, -7.5);
+      if (k.kind === "chase") { k.lockLane = targetLane; k.group.position.set(LANES[k.lockLane], 0, -7.5); }
       else if (k.kind === "hunt") k.group.position.set(0, 0, 20);
       else k.group.position.set(k.sideX, 0, 18);
     }
@@ -358,21 +358,28 @@ function startJump() {
   if (audioOn) playEl(jumpSnd, true);
 }
 
+function punchSpot(k, cx, cy, yOff, rMul) {
+  const rect = canvas.getBoundingClientRect();
+  const v = k.group.position.clone();
+  v.y += yOff;
+  v.project(camera);
+  const sx = (v.x * 0.5 + 0.5) * rect.width + rect.left;
+  const sy = (-v.y * 0.5 + 0.5) * rect.height + rect.top;
+  const r = Math.min(rect.width, rect.height) * rMul;
+  return Math.hypot(cx - sx, cy - sy) < r;
+}
+
 function punchAt(cx, cy) {
   if (!camera) return false;
-  const rect = canvas.getBoundingClientRect();
   let hit = false;
   let i;
   for (i = 0; i < kaiju.length; i += 1) {
     const k = kaiju[i];
     if (!k.live || k.friend) continue;
-    const v = k.group.position.clone();
-    v.y += k.kind === "hunt" ? 2.2 : 1.4;
-    v.project(camera);
-    const sx = (v.x * 0.5 + 0.5) * rect.width + rect.left;
-    const sy = (-v.y * 0.5 + 0.5) * rect.height + rect.top;
-    const r = Math.min(rect.width, rect.height) * (k.kind === "hunt" ? 0.34 : 0.2);
-    if (Math.hypot(cx - sx, cy - sy) < r) {
+    const hunt = k.kind === "hunt";
+    const body = punchSpot(k, cx, cy, hunt ? 1.2 : 0.85, hunt ? 0.32 : 0.2);
+    const face = punchSpot(k, cx, cy, hunt ? 3.1 : 2.35, hunt ? 0.28 : 0.22);
+    if (body || face) {
       landPunch(k);
       hit = true;
     }
@@ -385,9 +392,6 @@ function onPointer(ev) {
   if (ev.target && ev.target.closest) {
     if (ev.target.closest("a.hub-back") || ev.target.closest("#again")) return;
   }
-  const now = performance.now();
-  if (now - lastTap < 260) return;
-  lastTap = now;
   ev.preventDefault();
   unlockAudio();
   if (mode === "start") {
@@ -396,6 +400,9 @@ function onPointer(ev) {
   }
   if (mode !== "play") return;
   if (punchAt(ev.clientX, ev.clientY)) return;
+  const now = performance.now();
+  if (now - lastTap < 260) return;
+  lastTap = now;
   const rect = canvas.getBoundingClientRect();
   const x = ev.clientX - rect.left;
   const y = ev.clientY - rect.top;
@@ -482,8 +489,9 @@ function updateKaiju(dt) {
     if (!k.live) continue;
     k.age += dt;
     if (k.kind === "chase") {
-      const wantX = LANES[targetLane];
-      k.group.position.x += (wantX - k.group.position.x) * Math.min(1, 6 * dt);
+      if (k.lockLane == null) k.lockLane = targetLane;
+      const wantX = LANES[k.lockLane];
+      k.group.position.x += (wantX - k.group.position.x) * Math.min(1, 2.2 * dt);
       if (!k.friend && k.age < 3.1) k.group.position.z = Math.min(-1.6, k.group.position.z + 2.1 * dt);
       else k.group.position.z -= sp * 1.4 * dt;
       k.group.scale.setScalar(k.friend ? 0.85 : 1.35 + Math.max(0, -k.group.position.z) * 0.08);
