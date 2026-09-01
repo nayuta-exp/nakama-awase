@@ -22,31 +22,38 @@ const countEl = document.getElementById("count");
 const clearEl = document.getElementById("clear");
 const againBtn = document.getElementById("again");
 const startEl = document.getElementById("start");
-const jumpBtn = document.getElementById("jump");
 const sayEl = document.getElementById("say");
 
-const bgm = new Audio("audio/bgm-loop.ogg");
+const BGM_VOL = 0.28;
+const bgm = new Audio("audio/bgm-run.ogg");
 bgm.loop = true;
-bgm.volume = 0.72;
-const starSnd = new Audio("audio/star.ogg");
-starSnd.volume = 0.95;
-const jumpSnd = new Audio("audio/punch.ogg");
-jumpSnd.volume = 0.9;
-const punchSnd = new Audio("audio/punch.ogg");
+bgm.volume = BGM_VOL;
+const jumpSnd = new Audio("audio/se-jump.ogg");
+jumpSnd.volume = 0.95;
+const punchSnd = new Audio("audio/se-punch.ogg");
 punchSnd.volume = 1;
-const bumpSnd = new Audio("audio/bump.ogg");
-bumpSnd.volume = 0.9;
-const fanfare = new Audio("audio/dodon-big.ogg");
+const bumpSnd = new Audio("audio/se-bump.ogg");
+bumpSnd.volume = 0.95;
+const fanfare = new Audio("audio/se-dodon-big.ogg");
 fanfare.volume = 1;
-const dodon = new Audio("audio/dodon.ogg");
+const dodon = new Audio("audio/se-dodon.ogg");
 dodon.volume = 1;
 
 function playEl(el, restart) {
   try {
     if (restart) el.currentTime = 0;
     const p = el.play();
-    if (p && typeof p.catch === "function") p.catch(function () {});
-  } catch (err) {}
+    if (p && typeof p.then === "function") {
+      return p.then(function () {
+        return true;
+      }).catch(function () {
+        return false;
+      });
+    }
+    return Promise.resolve(true);
+  } catch (err) {
+    return Promise.resolve(false);
+  }
 }
 
 function rand(a, b) {
@@ -128,31 +135,21 @@ function makeGlowTex() {
 }
 
 const FOG = 0x152044;
-const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-renderer.setSize(1, 1, false);
-renderer.setClearColor(FOG, 1);
-renderer.shadowMap.enabled = false;
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(FOG);
-scene.fog = new THREE.Fog(FOG, 16, 56);
-
-const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 120);
-camera.position.set(0, 5.1, -11);
-camera.lookAt(0, 0.9, 8);
-
-scene.add(new THREE.HemisphereLight(0x8aa0d0, 0x1a140c, 1.05));
-const sun = new THREE.DirectionalLight(0xffe2a8, 0.9);
-sun.position.set(-4, 12, 4);
-sun.castShadow = false;
-scene.add(sun);
-
-const clock = new THREE.Clock();
+let renderer;
+let scene;
+let camera;
+const timer = new THREE.Timer();
+timer.connect(document);
+let heroTex = null;
+let gTex = null;
+let rTex = null;
+let looping = false;
 const grounds = [];
 const stars = [];
 const sparks = [];
 const kaiju = [];
+const rubble = [];
+let bumpCool = 0;
 
 let heroRoot;
 let heroMesh;
@@ -163,7 +160,6 @@ let starsGot = 0;
 let audioOn = false;
 let time = 0;
 let lane = 1;
-let targetLane = 1;
 let friends = 0;
 let sayT = 0;
 
@@ -172,20 +168,23 @@ function speedNow() {
 }
 
 function resize() {
-  const w = Math.max(1, canvas.clientWidth || window.innerWidth);
-  const h = Math.max(1, canvas.clientHeight || Math.max(1, window.innerHeight - 180));
-  camera.aspect = w / h;
+  if (!renderer || !camera) return;
+  const cssW = Math.max(1, canvas.clientWidth || window.innerWidth);
+  const cssH = Math.max(1, canvas.clientHeight || Math.max(1, window.innerHeight - 180));
+  camera.aspect = cssW / cssH;
   camera.updateProjectionMatrix();
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setSize(w, h, false);
+  const long = Math.max(cssW, cssH);
+  const scale = long > 1920 ? 1920 / long : 1;
+  renderer.setSize(Math.max(1, Math.floor(cssW * scale)), Math.max(1, Math.floor(cssH * scale)), false);
 }
 window.addEventListener("resize", resize);
 window.addEventListener("orientationchange", resize);
 
 function unlockAudio() {
   if (audioOn) return;
-  audioOn = true;
-  playEl(bgm, false);
+  playEl(bgm, false).then(function (ok) {
+    if (ok && !bgm.paused) audioOn = true;
+  });
 }
 
 function jumpY() {
@@ -246,7 +245,6 @@ function collectStar(s) {
   starsGot += 1;
   countEl.textContent = String(starsGot);
   burst(s.group.position.x, s.group.position.y, s.group.position.z, 14);
-  if (audioOn) playEl(starSnd, true);
   if (bgm && audioOn) bgm.playbackRate = Math.min(1.35, 1 + starsGot * 0.03);
   maybeSpawnKaiju();
   if (starsGot >= GOAL) win();
@@ -291,6 +289,10 @@ function win() {
   mode = "clear";
   jumpT = -1;
   if (heroRoot) heroRoot.position.y = 0;
+  try {
+    bgm.pause();
+    bgm.volume = 0;
+  } catch (err) {}
   playEl(friends >= 2 ? fanfare : dodon, true);
   clearEl.classList.add("is-on");
 }
@@ -301,12 +303,15 @@ function resetRun() {
   starsGot = 0;
   friends = 0;
   lane = 1;
-  targetLane = 1;
   countEl.textContent = "0";
   clearEl.classList.remove("is-on");
   startEl.classList.remove("is-on");
   sayEl.hidden = true;
-  if (bgm) bgm.playbackRate = 1;
+  if (bgm) {
+    bgm.playbackRate = 1;
+    bgm.volume = BGM_VOL;
+    if (audioOn) playEl(bgm, false);
+  }
   let i;
   for (i = 0; i < GROUND_N; i += 1) grounds[i].position.z = i * SEG_LEN;
   for (i = 0; i < sparks.length; i += 1) {
@@ -353,10 +358,40 @@ function startJump() {
   if (audioOn) playEl(jumpSnd, true);
 }
 
+function punchAt(cx, cy) {
+  if (!camera) return false;
+  const rect = canvas.getBoundingClientRect();
+  let hit = false;
+  let i;
+  for (i = 0; i < kaiju.length; i += 1) {
+    const k = kaiju[i];
+    if (!k.live || k.friend) continue;
+    const v = k.group.position.clone();
+    v.y += 1.4;
+    v.project(camera);
+    const sx = (v.x * 0.5 + 0.5) * rect.width + rect.left;
+    const sy = (-v.y * 0.5 + 0.5) * rect.height + rect.top;
+    const r = Math.min(rect.width, rect.height) * 0.24;
+    if (Math.hypot(cx - sx, cy - sy) < r) {
+      k.friend = true;
+      friends += 1;
+      hit = true;
+      burst(k.group.position.x, 1.6, k.group.position.z, 18);
+      say("なかまになれ！");
+      if (audioOn) playEl(punchSnd, true);
+    }
+  }
+  return hit;
+}
+
+let lastTap = 0;
 function onPointer(ev) {
   if (ev.target && ev.target.closest) {
-    if (ev.target.closest("a.hub-back") || ev.target.closest("#again") || ev.target.closest("#jump")) return;
+    if (ev.target.closest("a.hub-back") || ev.target.closest("#again")) return;
   }
+  const now = performance.now();
+  if (now - lastTap < 260) return;
+  lastTap = now;
   ev.preventDefault();
   unlockAudio();
   if (mode === "start") {
@@ -364,11 +399,8 @@ function onPointer(ev) {
     return;
   }
   if (mode !== "play") return;
-  if (punchNearby()) return;
-  const x = ev.clientX;
-  const mid = window.innerWidth * 0.5;
-  if (x < mid) targetLane = Math.max(0, targetLane - 1);
-  else targetLane = Math.min(2, targetLane + 1);
+  if (punchAt(ev.clientX, ev.clientY)) return;
+  startJump();
 }
 
 function updateHero(dt) {
@@ -376,8 +408,8 @@ function updateHero(dt) {
     jumpT += dt;
     if (jumpT >= JUMP_DUR) jumpT = -1;
   }
-  lane += (targetLane - lane) * Math.min(1, 10 * dt);
-  const x = LANES[0] + (LANES[2] - LANES[0]) * (lane / 2);
+  lane += (1 - lane) * Math.min(1, 8 * dt);
+  const x = LANES[1];
   const y = Math.max(0, jumpY());
   if (heroRoot) {
     heroRoot.position.set(x, y, 0);
@@ -473,9 +505,9 @@ function updateSparks(dt) {
   }
 }
 
-function tick() {
-  requestAnimationFrame(tick);
-  const dt = Math.min(0.05, clock.getDelta());
+function tick(timestamp) {
+  timer.update(timestamp);
+  const dt = Math.min(0.05, timer.getDelta());
   time += dt;
   if (sayT > 0) {
     sayT -= dt;
@@ -484,9 +516,92 @@ function tick() {
   updateHero(dt);
   updateStars(dt);
   updateKaiju(dt);
+  updateRubble(dt);
   updateGrounds(dt);
   updateSparks(dt);
   renderer.render(scene, camera);
+}
+
+function startLoop() {
+  if (!renderer) return;
+  looping = true;
+  renderer.setAnimationLoop(tick);
+}
+
+function stopLoop() {
+  looping = false;
+  if (renderer) renderer.setAnimationLoop(null);
+}
+
+function disposeObject(root) {
+  root.traverse(function (obj) {
+    if (obj.geometry) obj.geometry.dispose();
+    if (obj.material) {
+      const list = Array.isArray(obj.material) ? obj.material : [obj.material];
+      let i;
+      for (i = 0; i < list.length; i += 1) list[i].dispose();
+    }
+  });
+}
+
+function clearWorld() {
+  if (!scene) return;
+  disposeObject(scene);
+  while (scene.children.length) scene.remove(scene.children[0]);
+  grounds.length = 0;
+  stars.length = 0;
+  sparks.length = 0;
+  kaiju.length = 0;
+  rubble.length = 0;
+  heroRoot = null;
+  heroMesh = null;
+  heroShadow = null;
+}
+
+function makeRenderer() {
+  const r = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, alpha: false });
+  r.setSize(1, 1, false);
+  r.setClearColor(FOG, 1);
+  r.shadowMap.enabled = false;
+  return r;
+}
+
+function mountLights() {
+  scene.add(new THREE.HemisphereLight(0x8aa0d0, 0x1a140c, 1.05));
+  const sun = new THREE.DirectionalLight(0xffe2a8, 0.9);
+  sun.position.set(-4, 12, 4);
+  sun.castShadow = false;
+  scene.add(sun);
+}
+
+function mountWorld() {
+  scene.background = new THREE.Color(FOG);
+  scene.fog = new THREE.Fog(FOG, 16, 56);
+  mountLights();
+  buildGrounds(makeRoadTex());
+  buildHero(heroTex);
+  buildKaiju(gTex, rTex);
+  buildStarPool();
+  buildSparkPool();
+  buildRubble();
+  buildMoon();
+  placeStars();
+}
+
+function rebuildScene() {
+  clearWorld();
+  if (renderer) {
+    try {
+      renderer.dispose();
+    } catch (err) {}
+  }
+  renderer = makeRenderer();
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(55, 1, 0.1, 120);
+  camera.position.set(0, 5.1, -11);
+  camera.lookAt(0, 0.9, 8);
+  mountWorld();
+  resize();
 }
 
 function lockScroll() {
@@ -586,6 +701,38 @@ function buildSparkPool() {
   }
 }
 
+
+function buildRubble() {
+  const geo = new THREE.BoxGeometry(1.1, 0.7, 1.1);
+  const mat = new THREE.MeshLambertMaterial({ color: 0x6a5a4a });
+  let i;
+  for (i = 0; i < 6; i += 1) {
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(LANES[i % 3], 0.35, 22 + i * 14);
+    scene.add(mesh);
+    rubble.push(mesh);
+  }
+}
+
+function updateRubble(dt) {
+  if (mode !== "play") return;
+  if (bumpCool > 0) bumpCool -= dt;
+  const sp = speedNow();
+  const hx = heroRoot ? heroRoot.position.x : 0;
+  const hy = heroRoot ? heroRoot.position.y : 0;
+  let i;
+  for (i = 0; i < rubble.length; i += 1) {
+    const m = rubble[i];
+    m.position.z -= sp * dt;
+    if (m.position.z < -6) m.position.z += 84;
+    if (hy < 0.9 && Math.abs(m.position.x - hx) < 1.05 && Math.abs(m.position.z) < 1.15) {
+      if (bumpCool <= 0 && audioOn) {
+        playEl(bumpSnd, true);
+        bumpCool = 0.45;
+      }
+    }
+  }
+}
 function buildMoon() {
   const moon = new THREE.Mesh(
     new THREE.SphereGeometry(3.2, 16, 16),
@@ -597,33 +744,47 @@ function buildMoon() {
 
 async function boot() {
   lockScroll();
+  renderer = makeRenderer();
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(55, 1, 0.1, 120);
+  camera.position.set(0, 5.1, -11);
+  camera.lookAt(0, 0.9, 8);
   resize();
   const loader = new THREE.TextureLoader();
-  const heroTex = await loadTex(loader, "assets/hero.png");
-  const gTex = await loadTex(loader, "assets/kaiju-g.png");
-  const rTex = await loadTex(loader, "assets/kaiju-r.png");
-  buildGrounds(makeRoadTex());
-  buildHero(heroTex);
-  buildKaiju(gTex, rTex);
-  buildStarPool();
-  buildSparkPool();
-  buildMoon();
-  placeStars();
-  canvas.addEventListener("pointerdown", onPointer, { passive: false });
-  startEl.addEventListener("pointerdown", onPointer, { passive: false });
-  jumpBtn.addEventListener("pointerdown", function (ev) {
-    ev.preventDefault();
-    ev.stopPropagation();
-    unlockAudio();
-    if (mode === "start") resetRun();
-    startJump();
-  });
+  heroTex = await loadTex(loader, "assets/hero.png");
+  gTex = await loadTex(loader, "assets/kaiju-g.png");
+  rTex = await loadTex(loader, "assets/kaiju-r.png");
+  mountWorld();
+  canvas.addEventListener("pointerup", onPointer, { passive: false });
+  startEl.addEventListener("pointerup", onPointer, { passive: false });
+  startEl.addEventListener("click", onPointer);
+  canvas.addEventListener("click", onPointer);
   againBtn.addEventListener("click", function (ev) {
     ev.preventDefault();
     ev.stopPropagation();
+    unlockAudio();
     resetRun();
   });
-  tick();
+  canvas.addEventListener("webglcontextlost", function (ev) {
+    ev.preventDefault();
+    stopLoop();
+  });
+  canvas.addEventListener("webglcontextrestored", function () {
+    rebuildScene();
+    if (!document.hidden) startLoop();
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+      try {
+        bgm.pause();
+      } catch (err) {}
+      stopLoop();
+    } else {
+      if (audioOn) playEl(bgm, false);
+      startLoop();
+    }
+  });
+  startLoop();
 }
 
 boot();
