@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#14161c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>ほしとり</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+  {"imports": {"three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}
+  </script>
+</head>
+<body>
+  <a class="hub-back" href="/">もどる</a>
+  <p class="score" aria-live="polite"><span id="count">0</span>/10</p>
+  <canvas id="view"></canvas>
+  <p class="say" id="say" hidden></p>
+  <button type="button" class="jump-btn" id="jump">ジャンプ</button>
+  <section class="screen is-on" id="start">
+    <img class="start-hero" src="assets/hero.png" alt="">
+    <p class="speech">街の奥に星が10こ。走って、ジャンプして、ぜんぶとれ！かいじゅうがいたらパンチだ！</p>
+  </section>
+  <section class="overlay" id="clear">
+    <div class="glow"></div>
+    <p class="overlay-msg">ぜんぶ とった！</p>
+    <div class="clear-actions">
+      <button type="button" class="big-btn" id="again">もういっかい</button>
+      <a class="big-btn" href="/">もどる</a>
+    </div>
+  </section>
+  <script type="module" src="game.js"></script>
+</body>
+</html>
