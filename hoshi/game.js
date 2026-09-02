@@ -373,28 +373,21 @@ function startJump() {
   if (audioOn) playEl(jumpSnd, true);
 }
 
-function punchSpot(k, cx, cy, yOff, rMul) {
-  const rect = canvas.getBoundingClientRect();
-  const v = k.group.position.clone();
-  v.y += yOff;
-  v.project(camera);
-  const sx = (v.x * 0.5 + 0.5) * rect.width + rect.left;
-  const sy = (-v.y * 0.5 + 0.5) * rect.height + rect.top;
-  const r = Math.min(rect.width, rect.height) * rMul;
-  return Math.hypot(cx - sx, cy - sy) < r;
+function inHuntBox(k) {
+  if (!k || !k.live || k.friend) return false;
+  const x = k.group.position.x;
+  const z = k.group.position.z;
+  const x0 = LANES[0] - 1.9;
+  const x1 = LANES[2] + 1.9;
+  return x >= x0 && x <= x1 && z > 0.3 && z < 12;
 }
 
-function punchAt(cx, cy) {
-  if (!camera) return false;
+function punchAt() {
   let hit = false;
   let i;
   for (i = 0; i < kaiju.length; i += 1) {
     const k = kaiju[i];
-    if (!k.live || k.friend) continue;
-    const hunt = k.kind === "hunt";
-    const body = punchSpot(k, cx, cy, hunt ? 1.2 : 0.85, hunt ? 0.32 : 0.2);
-    const face = punchSpot(k, cx, cy, hunt ? 3.1 : 2.35, hunt ? 0.28 : 0.22);
-    if (body || face) {
+    if (inHuntBox(k)) {
       landPunch(k);
       hit = true;
     }
@@ -414,7 +407,7 @@ function onPointer(ev) {
     return;
   }
   if (mode !== "play") return;
-  if (punchAt(ev.clientX, ev.clientY)) return;
+  if (punchAt()) return;
   const now = performance.now();
   if (now - lastTap < 260) return;
   lastTap = now;
