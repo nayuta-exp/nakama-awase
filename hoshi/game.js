@@ -71,7 +71,6 @@ function loadTex(loader, url) {
       function (t) {
         t.colorSpace = THREE.SRGBColorSpace;
         t.minFilter = THREE.LinearFilter;
-        t.anisotropy = 4;
         resolve(t);
       },
       undefined,
