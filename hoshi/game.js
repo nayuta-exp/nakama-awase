@@ -307,6 +307,7 @@ function win() {
   const pic = document.getElementById("clear-pic");
   if (pic) pic.src = friends >= 2 ? "assets/clear-big.png" : "assets/clear.png";
   clearEl.classList.add("is-on");
+  if (countEl && countEl.parentElement) countEl.parentElement.hidden = true;
 }
 
 function resetRun() {
@@ -317,6 +318,7 @@ function resetRun() {
   lane = 1;
   targetLane = 1;
   countEl.textContent = "0";
+  if (countEl && countEl.parentElement) countEl.parentElement.hidden = false;
   clearEl.classList.remove("is-on");
   startEl.classList.remove("is-on");
   sayEl.hidden = true;
