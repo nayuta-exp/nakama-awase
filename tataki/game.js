@@ -48,6 +48,7 @@
   var tapsToHero = 3 + Math.floor(Math.random() * 3);
   var nextId = 1;
   var spawnTimer = 0;
+  var started = false;
 
   function rand(min, max) {
     return min + Math.random() * (max - min);
@@ -234,12 +235,32 @@
     });
   }
 
+  function beginPlay() {
+    if (started) return;
+    started = true;
+    var startEl = document.getElementById("start");
+    if (startEl) startEl.classList.remove("is-on");
+    unlockAudio();
+    ensureKaiju();
+    if (!spawnTimer) {
+      spawnTimer = window.setInterval(function () {
+        if (liveKaiju().length < MAX_ON) spawnKaiju();
+      }, 1600);
+    }
+  }
+
   lockScroll();
-  document.addEventListener("pointerdown", unlockAudio, { once: true });
-  ensureKaiju();
-  spawnTimer = window.setInterval(function () {
-    if (liveKaiju().length < MAX_ON) spawnKaiju();
-  }, 1600);
+  var startEl = document.getElementById("start");
+  if (startEl) {
+    startEl.addEventListener("pointerup", beginPlay);
+    startEl.addEventListener("click", beginPlay);
+  } else {
+    document.addEventListener("pointerdown", unlockAudio, { once: true });
+    ensureKaiju();
+    spawnTimer = window.setInterval(function () {
+      if (liveKaiju().length < MAX_ON) spawnKaiju();
+    }, 1600);
+  }
 
   window.addEventListener("resize", function () {
     liveKaiju().forEach(function (el) {

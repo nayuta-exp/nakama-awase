@@ -297,3 +297,8 @@ body {
     display: none;
   }
 }
+
+.screen { display: none; position: fixed; inset: 0; z-index: 50; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 88px 20px 32px; background: #7ec8ea; }
+.screen.is-on { display: flex; }
+.start-kaiju { width: min(70vw, 62vh); height: min(70vw, 62vh); object-fit: contain; pointer-events: none; }
+.start-line { margin: 0; font-size: 36px; font-weight: 800; text-align: center; color: #123; text-shadow: 0 2px 0 rgba(255,255,255,.8); pointer-events: none; }

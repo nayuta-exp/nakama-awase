@@ -45,7 +45,16 @@
   nuru.volume = 1;
   var fanfare = new Audio("audio/clear-fanfare.ogg");
   fanfare.volume = 1;
+  var iro = new Audio("audio/se-iro.ogg");
+  iro.volume = 1;
+  var iroOn = false;
   var didFanfare = false;
+
+  function playIro() {
+    if (iroOn) return;
+    iroOn = true;
+    playEl(iro, true);
+  }
 
   function playEl(el, restart) {
     try {
@@ -212,6 +221,7 @@
     ctx.putImageData(img, 0, 0);
     filling = false;
     syncUndo();
+    playIro();
     playEl(nuru, true);
     if (!didFanfare && isFullyPainted(d)) {
       didFanfare = true;
@@ -298,6 +308,7 @@
       btn.setAttribute("aria-selected", idx === 0 ? "true" : "false");
       if (idx === 0) btn.classList.add("is-on");
       btn.addEventListener("click", function () {
+        playIro();
         currentColor = color;
         Array.prototype.forEach.call(paletteEl.querySelectorAll(".swatch"), function (el) {
           el.classList.remove("is-on");
