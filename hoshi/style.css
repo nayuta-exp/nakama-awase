@@ -218,3 +218,21 @@ body {
   text-shadow: 0 2px 12px #000;
   pointer-events: none;
 }
+
+.clear-cast { position: relative; z-index: 1; display: flex; align-items: flex-end; justify-content: center; gap: 8px; width: min(92vw, 720px); pointer-events: none; }
+.clear-hero, .clear-side { object-fit: contain; height: min(38vh, 280px); }
+.clear-hero { height: min(46vh, 340px); }
+.clear-side[hidden] { display: none; }
+.burst { position: absolute; inset: 8% 0 28%; z-index: 1; pointer-events: none; }
+.burst i { position: absolute; width: 72px; height: 72px; margin: -36px; background: radial-gradient(circle at 50% 40%, #fff6c4 0 18%, #ffd24a 32%, #f5a623 55%, transparent 68%); clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); animation: pop 0.9s ease-out forwards; }
+@keyframes pop { from { transform: translate(0,0) scale(0.2); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(1); opacity: 0.15; } }
+
+.clear-pic {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: min(92vw, 640px);
+  max-height: min(62vh, 520px);
+  object-fit: contain;
+  pointer-events: none;
+}

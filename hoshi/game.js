@@ -28,6 +28,10 @@ const BGM_VOL = 0.28;
 const bgm = new Audio("audio/bgm-run.ogg");
 bgm.loop = true;
 bgm.volume = BGM_VOL;
+const starSnd = new Audio("audio/se-star.ogg");
+starSnd.volume = 0.95;
+const callSnd = new Audio("audio/se-call.ogg");
+callSnd.volume = 1;
 const jumpSnd = new Audio("audio/se-jump.ogg");
 jumpSnd.volume = 0.95;
 const punchSnd = new Audio("audio/se-punch.ogg");
@@ -160,6 +164,7 @@ let mode = "start";
 let jumpT = -1;
 let starsGot = 0;
 let audioOn = false;
+let callOn = false;
 let time = 0;
 let lane = 1;
 let targetLane = 1;
@@ -184,6 +189,11 @@ window.addEventListener("resize", resize);
 window.addEventListener("orientationchange", resize);
 
 function unlockAudio() {
+  if (!callOn) {
+    playEl(callSnd, true).then(function (ok) {
+      if (ok) callOn = true;
+    });
+  }
   if (audioOn) return;
   playEl(bgm, false).then(function (ok) {
     if (ok && !bgm.paused) audioOn = true;
@@ -248,6 +258,7 @@ function collectStar(s) {
   starsGot += 1;
   countEl.textContent = String(starsGot);
   burst(s.group.position.x, s.group.position.y, s.group.position.z, 14);
+  playEl(starSnd, true);
   if (bgm && audioOn) bgm.playbackRate = Math.min(1.35, 1 + starsGot * 0.03);
   maybeSpawnKaiju();
   if (starsGot >= GOAL) win();
@@ -293,6 +304,8 @@ function win() {
     bgm.volume = 0;
   } catch (err) {}
   playEl(friends >= 2 ? fanfare : dodon, true);
+  const pic = document.getElementById("clear-pic");
+  if (pic) pic.src = friends >= 2 ? "assets/clear-big.png" : "assets/clear.png";
   clearEl.classList.add("is-on");
 }
 
