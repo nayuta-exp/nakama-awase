@@ -158,8 +158,9 @@ body {
 }
 
 .start-hero {
-  width: min(78vw, 70vh);
-  height: min(78vw, 70vh);
+  width: min(92vw, 900px);
+  height: auto;
+  max-height: min(62vh, 560px);
   object-fit: contain;
   pointer-events: none;
 }
