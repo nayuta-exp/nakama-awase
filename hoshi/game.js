@@ -289,8 +289,32 @@ function landPunch(k) {
   if (k.hits >= need) {
     k.friend = true;
     friends += 1;
-    burst(k.group.position.x, 1.8, k.group.position.z, 22);
+    burst(k.group.position.x, 1.8, k.group.position.z, 36);
+    if (k.kind === "hunt") showRecoil();
   }
+}
+
+function reducedMotion() {
+  try {
+    return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch (err) {
+    return false;
+  }
+}
+
+function showRecoil() {
+  if (reducedMotion()) return;
+  const el = document.getElementById("recoil");
+  if (!el || mode !== "play") return;
+  mode = "recoil";
+  el.hidden = false;
+  el.classList.add("is-on");
+  burst(0, 1.8, 4, 40);
+  window.setTimeout(function () {
+    el.classList.remove("is-on");
+    el.hidden = true;
+    if (mode === "recoil") mode = "play";
+  }, 1400);
 }
 
 function win() {
@@ -319,6 +343,11 @@ function resetRun() {
   countEl.textContent = "0";
   if (countEl && countEl.parentElement) countEl.parentElement.hidden = false;
   clearEl.classList.remove("is-on");
+  const rec = document.getElementById("recoil");
+  if (rec) {
+    rec.classList.remove("is-on");
+    rec.hidden = true;
+  }
   startEl.classList.remove("is-on");
   sayEl.hidden = true;
   if (bgm) {
@@ -405,6 +434,7 @@ function onPointer(ev) {
     resetRun();
     return;
   }
+  if (mode === "recoil") return;
   if (mode !== "play") return;
   if (punchAt()) return;
   const now = performance.now();
@@ -563,12 +593,16 @@ function tick(timestamp) {
     sayT -= dt;
     if (sayT <= 0) sayEl.hidden = true;
   }
-  updateHero(dt);
-  updateStars(dt);
-  updateKaiju(dt);
-  updateRubble(dt);
-  updateGrounds(dt);
-  updateSparks(dt);
+  if (mode === "recoil") {
+    updateSparks(dt);
+  } else {
+    updateHero(dt);
+    updateStars(dt);
+    updateKaiju(dt);
+    updateRubble(dt);
+    updateGrounds(dt);
+    updateSparks(dt);
+  }
   renderer.render(scene, camera);
 }
 
